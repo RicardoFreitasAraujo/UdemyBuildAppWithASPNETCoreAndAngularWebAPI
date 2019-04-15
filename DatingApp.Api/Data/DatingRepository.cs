@@ -51,21 +51,21 @@ namespace DatingApp.Api.Data
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)
         {
-            List<User> users = this.context.Users.Include(c => c.Photos).ToList();
+            IQueryable<User> users = this.context.Users.Include(c => c.Photos);
 
             if (userParams.Likers)
             {
                 var userLikers = await this.GetUserLikes(userParams.UserId, userParams.Likers);
-                users = users.Where(u => userLikers.Contains(u.Id)).ToList();
+                users = users.Where(u => userLikers.Contains(u.Id)).AsQueryable();
             }
 
             if (userParams.Likees)
             {
                 var userLikees = await this.GetUserLikes(userParams.UserId, userParams.Likers);
-                users = users.Where(u => userLikees.Contains(u.Id)).ToList();
+                users = users.Where(u => userLikees.Contains(u.Id)).AsQueryable();
             }
 
-            return await PagedList<User>.CreateAsync(users.AsQueryable(), userParams.PageNumber, userParams.PageSize);
+            return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
         }
 
         private async Task<IEnumerable<int>> GetUserLikes(int id, bool likers)
@@ -88,6 +88,21 @@ namespace DatingApp.Api.Data
         public async Task<bool> SaveAll()
         {
             return await this.context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Message> GetMessage(int id)
+        {
+            return await context.Messages.FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<PagedList<Message>> GetMessagesForUser()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Message>> GetmessageThread(int userId, int recipientId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
